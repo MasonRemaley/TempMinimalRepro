@@ -66,6 +66,14 @@ pub fn build(b: *std.Build) void {
     test_step.dependOn(&exe_tests.step);
 
     var copy_assets = b.addWriteFiles();
-    copy_assets.addCopyFile(.{ .path = "example.txt" }, "foo/bar/example.txt");
+    const path = "foo/bar/example.zig";
+    copy_assets.addCopyFile(.{ .path = "example.zig" }, path);
     exe.step.dependOn(&copy_assets.step);
+
+    // NOTE: this line fails due to unwrapping null
+    const file_source = copy_assets.getFileSource(path).?;
+
+    exe.addModule("example", b.createModule(.{
+        .source_file = file_source,
+    }));
 }
